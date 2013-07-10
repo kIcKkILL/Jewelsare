@@ -1,8 +1,9 @@
 #include <QPainter>
 #include "board.h"
+
 using namespace Jewelsare;
 
-Board::Board(QWidget *parent,Size size)
+Board::Board(Size size,QWidget *parent)
 	:QWidget(parent)
 {
 	size_ = size;

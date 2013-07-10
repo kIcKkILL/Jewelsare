@@ -11,23 +11,21 @@ class Jewel;
 
 class Board : public QWidget
 {
-
 	Q_OBJECT
 friend class GameLogic;
+static const int kSmallSize = 8;
+static const int kMediumSize = 10;
+static const int kLargeSize = 12;
 
 public:
-	static const int kSmallSize = 8;
-	static const int kMediumSize = 10;
-	static const int kLargeSize = 12;
 	enum Size { SMALL = kSmallSize, MEDIUM = kMediumSize, LARGE = kLargeSize };
 
-	explicit Board(QWidget *parent,Size);
+	explicit Board(Size , QWidget *parent = 0);
 protected:
 	void paintEvent(QPaintEvent *);
 
 signals:
-
-public slots:
+	void RequireGeneration(Board&);
 
 private:
 	Size size_;

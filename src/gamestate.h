@@ -5,7 +5,13 @@
 
 namespace Jewelsare {
 
-struct GameSettings;
+enum class Difficulty { EASY, MEDIUM, HARD };
+enum class Mode { TIME_LIMIT, FAST_REACTION };
+struct GameSettings {
+	Mode mode;
+	Difficulty difficulty;
+};
+
 class QBasicTimer;
 class ScoreSystem;
 
@@ -13,8 +19,7 @@ class GameState : public QObject
 {
 	Q_OBJECT
 public:
-	enum class Difficulty { EASY, MEDIUM, HARD };
-	enum class Mode { TIME_LIMIT, FAST_REACTION };
+	enum State { PAUSE, INGAME, ENDED };
 
 	explicit GameState(QObject *parent = 0);
 	virtual ~GameState();
@@ -30,6 +35,7 @@ private:
 	QBasicTimer *timer_;
 	GameSettings *settings_;
 	ScoreSystem *score_;
+	State state_;
 };
 
 }

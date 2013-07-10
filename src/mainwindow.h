@@ -25,6 +25,7 @@ public:
 private slots:
 	void StartClicked();
 	void ScoreClicked();
+	void GoClicked();
 
     
 private:

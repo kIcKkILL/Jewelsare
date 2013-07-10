@@ -12,9 +12,9 @@ class GameLogic : public QObject
 	Q_OBJECT
 public:
 	explicit GameLogic(QObject *parent = 0);
-	
+
 signals:
-	
+
 public slots:
 	void GenerateBoard(Jewelsare::Board &);
 	
