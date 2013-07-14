@@ -23,7 +23,7 @@ public:
 		timer_.start(5000);
 		connect(&timer_,SIGNAL(timeout()),this,SIGNAL(TimeOut()));
 	}
-	int NextGeneration() { return 5; }
+	int NextGeneration() { return 5; } //TODO make it more complicated
 signals:
 	void TimeOut();
 private:
