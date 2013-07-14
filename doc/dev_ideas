@@ -4,7 +4,7 @@ Util:
       改变了外观的QPushButton，比较美观的按钮
   jewel.h
     JewelWidget类
-      继承字QWidget，一个宝石，可发出SwapWith（left right up down）信号
+      继承字QWidget，一个宝石，可发出Swap（left right up down）信号
 
 src:
   mainwindow.h
@@ -22,33 +22,21 @@ src:
       
   board.h
     BoardEvent类
-      传递的信息：某些地方新增了Jewel;某些地方的Jewel下落到某些地方;某些地方的Jewel消失
+      表示传递的信息：某些地方新增了Jewel;某些地方的Jewel下落到某些地方;某些地方的Jewel消失
     Board类
       封装的数组保存宝石状态，同时保存临时状态（用于类内部计算）和稳定状态。可以提供swap函数，若经check可交换则计算出会发生的事，
 返回list<BoardEvent>给上层，依次传递给UI，同时更新储存的宝石状态。
       
   game.h
     Game类
-      包含Board类，
-
-
+      包含Board类，及游戏逻辑类，ScoreSystem类
       
+  scoresystem.h
+    ScoreSystem类
+      Game类处理获得的BoardEvent时将有关信息传给ScoreSystem类进行单独的分数处理
       
-      
-      
-      
-      
-      
-//OUTDATED IDEAS
-Game类含有Board类，ModeLogic类，GetScore函数从ModeLogic类中获取分数
-
-Board类，Board类要拿到mainwindow的指针（怎么做）只负责储存棋盘，绘制和获取鼠标事件，包含BoardLogic类
-BoardLogic负责生成棋盘（参数包括至少有多少可消除宝石），判断移动是否可行，做消除（每步消除SIGNAL给ModeLogic一个消除宝石数）
-（消除结束SIGNAL一个消除结束消息）
-
-ModeLogic类是接口类，实现类现在有TimeLimitedLogic和FastReactionLogic类
-收到BoardLogic的消除数目计算加分
-
-主界面时可以选择，设置什么的，存储到GameState类，当开始游戏时，GameState类新建一个Game类。
-主界面单击START GAME后进入难度选择界面
-GameState类 通过SIGNAL与 window通信，告知要绘制哪一阶段。所有阶段信息（如
+  modelogic.h
+    ModeLogic类（纯虚）
+      提供控制宝石生成以及游戏流程的接口
+    TimeOutMode FastReactionMode 类
+      分别实现两种游戏模式
