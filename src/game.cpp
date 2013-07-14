@@ -1,32 +1,41 @@
+#include "gamestate.h"
 #include "game.h"
 #include "board.h"
-#include "gamestate.h"
 #include "gamelogic.h"
+#include "scoresystem.h"
 
 using namespace Jewelsare;
 
-
-Game::Game(const GameSettings &settings,QObject *parent) :
-	QObject(parent)
+Game::Game(const GameSettings &settings,QObject *parent)
 {
-	switch (settings.difficulty) {
+	Board::Size boardsize;
+	switch(settings.difficulty) {
 	case Difficulty::EASY:
-		board_ = new Board(Board::LARGE,dynamic_cast<QWidget*>(parent));
+		boardsize = Board::SMALL;
 		break;
 	case Difficulty::MEDIUM:
-		board_ = new Board(Board::MEDIUM,dynamic_cast<QWidget*>(parent));
+		boardsize = Board::MEDIUM;
 		break;
 	case Difficulty::HARD:
-		board_ = new Board(Board::SMALL,dynamic_cast<QWidget*>(parent));
+		boardsize = Board::LARGE;
 		break;
 	default:
 		break;
 	}
-
-	game_logic_ = new GameLogic();
+	board_ = new Board(boardsize);
+	mode_logic_ = new TimeOutMode();
+	board_->SetGenerationFactor(mode_logic_->NextGeneration());
+	board_->Generate();
+	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame()));
 }
 
-Game::~Game()
+std::list<BoardEvent> Game::Swap(JewelPos pos,JewelWidget::SwapDirection direction)
+{
+	// update generation factor
+	board_->SetGenerationFactor(mode_logic_->NextGeneration());
+}
+
+void Game::EndGame()
 {
 
 }

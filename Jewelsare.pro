@@ -17,20 +17,20 @@ SOURCES += src/main.cpp\
         src/mainwindow.cpp \
     src/gamestate.cpp \
     src/board.cpp \
-    src/game.cpp \
     src/gamelogic.cpp \
-    src/jewel.cpp \
     src/scoresystem.cpp \
-    src/util/jewelbutton.cpp
+    src/util/jewelbutton.cpp \
+	src/util/jewelwidget.cpp \
+    src/game.cpp
 
 HEADERS  += src/mainwindow.h \
     src/gamestate.h \
     src/board.h \
-    src/game.h \
     src/gamelogic.h \
-    src/jewel.h \
+    src/util/jewelwidget.h \
     src/scoresystem.h \
-    src/util/jewelbutton.h
+    src/util/jewelbutton.h \
+    src/game.h
 
 FORMS    += src/mainwindow.ui
 

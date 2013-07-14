@@ -2,6 +2,8 @@
 #define GAMESTATE_H
 
 #include <QObject>
+#include "board.h"
+#include "util/jewelwidget.h"
 
 namespace Jewelsare {
 
@@ -12,8 +14,11 @@ struct GameSettings {
 	Difficulty difficulty;
 };
 
-class QBasicTimer;
-class ScoreSystem;
+class Game;
+
+class HighScoresStorage {
+
+};
 
 class GameState : public QObject
 {
@@ -25,17 +30,20 @@ public:
 	virtual ~GameState();
 	void SetDifficulty(Difficulty);
 	void SetMode(Mode);
+	void StartNewGame();
+	void Pause();
+	void Resume();
+	std::list<BoardEvent> Swap(JewelPos,JewelWidget::SwapDirection direction);
 
 signals:
 	
 public slots:
-	void StartNewGame();
 
 private:
-	QBasicTimer *timer_;
+	HighScoresStorage highscores_;
 	GameSettings *settings_;
-	ScoreSystem *score_;
 	State state_;
+	Game *game_;
 };
 
 }

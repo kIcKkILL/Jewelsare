@@ -7,8 +7,8 @@ class ScoreSystem
 {
 public:
 	ScoreSystem();
-	virtual void InitMove() = 0;
-	virtual void MoreMove() = 0;
+	virtual void FirstGain() = 0;
+	virtual void MoreGain() = 0;
 	virtual void FinishMove() = 0;
 	virtual ~ScoreSystem() = 0;
 	qint64 GetScore() { return total_score_; }
