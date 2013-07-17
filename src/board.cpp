@@ -1,6 +1,3 @@
-#include <QPainter>
-#include <QMouseEvent>
-#include <QPaintEvent>
 #include <cstdlib>
 #include <ctime>
 #include "board.h"
@@ -10,33 +7,41 @@ using namespace Jewelsare;
 using namespace std;
 
 Board::Board(Size size) :
-	size_(size),
+	board_(size,vector<int>(size,0)),
 	generation_factor_(1),
-	board_(size,vector<int>(size,0))
+	size_(size)
 {
 	srand(time(NULL));
 }
 
-list<BoardEvent> Board::Swap(JewelPos pos,JewelWidget::SwapDirection direction)
+list<BoardEvent> Board::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
 {
 	list<BoardEvent> events;
 	IntTab tab = board_;
 	int i = pos.x, j = pos.y;
 
 	switch(direction) {
-	case JewelWidget::SwapDirection::UP:
+	case Jewelsare::SwapDirection::UP:
+		if(i == 0)
+			return events;
 		tab[i][j] = tab[i-1][j];
 		tab[i-1][j] = board_[i][j];
 		break;
-	case JewelWidget::SwapDirection::DOWN:
+	case Jewelsare::SwapDirection::DOWN:
+		if(i == size_-1)
+			return events;
 		tab[i][j] = tab[i+1][j];
 		tab[i+1][j] = board_[i][j];
 		break;
-	case JewelWidget::SwapDirection::LEFT:
+	case Jewelsare::SwapDirection::LEFT:
+		if(j == 0)
+			return events;
 		tab[i][j] = tab[i][j-1];
 		tab[i][j-1] = board_[i][j];
 		break;
-	case JewelWidget::SwapDirection::RIGHT:
+	case Jewelsare::SwapDirection::RIGHT:
+		if(j == size_-1)
+			return events;
 		tab[i][j] = tab[i][j+1];
 		tab[i][j+1] = board_[i][j];
 		break;
@@ -53,24 +58,58 @@ list<BoardEvent> Board::Swap(JewelPos pos,JewelWidget::SwapDirection direction)
 	BoardEvent new_event(BoardEvent::EventType::DIE);
 	new_event.SetDiePos(deleted);
 	events.push_back(new_event);
+	// elimination
 	for(JewelPos pos :deleted)
 		board_[pos.x][pos.y] = 0;
 	// TODO fall->eliminate->fall->eliminate-> ...
+	do {
+		//fall
+		new_event = BoardEvent(BoardEvent::EventType::FALL);
+		new_event.SetFallPos(Fall(board_));
+		events.push_back(new_event);
+		deleted = Eliminatable(board_);
+		if(deleted.size() > 0) {
+			new_event = BoardEvent(BoardEvent::EventType::DIE);
+			new_event.SetDiePos(deleted);
+			events.push_back(new_event);
+			// elimination
+			for(JewelPos eles : deleted )
+				board_[eles.x][eles.y] = 0;
+		}
+		else
+			break;
+	} while(true);
+	// generate
+	new_event = BoardEvent(BoardEvent::EventType::NEW);
+	new_event.SetNewPos(Generate(board_));
+	events.push_back(new_event);
+	return events;
 }
 
-void Board::Generate()
+BoardEvent Board::Init()
 {
-	IntTab tmptab = board_;
+	BoardEvent event(BoardEvent::EventType::NEW);
+	event.SetNewPos(Generate(board_));
+	return event;
+}
+
+list<JewelInfo> Board::Generate(IntTab &tab)
+{
+	IntTab tmptab = tab;
+	list<JewelInfo> infolist;
 	do {
+		infolist.clear();
 		for(int i=0;i!=size_;++i)
 			for(int j=0;j!=size_;++j)
 				if(board_[i][j] == 0) {
 					// random between 1 and 5
 					tmptab[i][j] = rand() % 5+1;
+					infolist.push_back(pair<JewelPos,int>(JewelPos(i,j),tmptab[i][j]));
 				}
-	} while(Eliminatable(tmptab).size()==0 && PossibleSwap(tmptab)>=generation_factor_);
+	} while(!Eliminatable(tmptab).empty() || PossibleSwap(tmptab) < generation_factor_);
 	// update
-	board_ = tmptab;
+	tab = tmptab;
+	return infolist;
 }
 
 int Board::PossibleSwap(const IntTab& tab) const
@@ -83,7 +122,7 @@ int Board::PossibleSwap(const IntTab& tab) const
 			// swap
 			tab2[i][j] = tab2[i][j+1];
 			tab2[i][j+1] = tab[i][j];
-			if(Eliminatable(tab2).size()!=0)
+			if(!Eliminatable(tab2).empty())
 				++count;
 			// revert changes
 			tab2[i][j] = tab[i][j];
@@ -95,7 +134,7 @@ int Board::PossibleSwap(const IntTab& tab) const
 			// swap
 			tab2[i][j] = tab2[i+1][j];
 			tab2[i+1][j] = tab[i][j];
-			if(Eliminatable(tab2).size()!=0)
+			if(!Eliminatable(tab2).empty())
 				++count;
 			// revert changes
 			tab2[i][j] = tab[i][j];
@@ -106,6 +145,7 @@ int Board::PossibleSwap(const IntTab& tab) const
 
 list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 {
+	//FIXME wrong logic adding list!
 	list<JewelPos> ret;
 	// check vertically
 	for(int i=0;i!=size_;++i)
@@ -115,11 +155,20 @@ list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 			for(k=j;k!=size_;++k)
 				if(tab[i][k] != current)
 					break;
-			if(k-j >=3) {
+			if(k-j >=3)
 				// add them to list
-				for(int l = j;l<=k;++l)
-					ret.push_back(JewelPos(i,l));
-			}
+				for(int l = j;l<=k;++l) {
+					// check if already in list
+					bool duplicate = false;
+					for(JewelPos ele : ret)
+						if(ele.x == i && ele.y == j) {
+							duplicate = true;
+							break;
+						}
+
+					if(!duplicate)
+						ret.push_back(JewelPos(i,l));
+				}
 		}
 
 	// check horizontally
@@ -130,27 +179,44 @@ list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 			for(k=i;k!=size_;++k)
 				if(tab[k][j] != current)
 					break;
-			if(k-i >=3) {
+			if(k-i >=3)
 				// add them to list
-				for(int l = i;l<=k;++l)
-					ret.push_back(JewelPos(l,j));
-			}
+				for(int l = i;l<=k;++l) {
+					bool duplicate = false;
+					for(JewelPos ele : ret)
+						if(ele.x == i && ele.y == j) {
+							duplicate = true;
+							break;
+						}
+					if(!duplicate)
+							ret.push_back(JewelPos(l,j));
+				}
 		}
 	return ret;
 }
 
-void Board::Fall(Board::IntTab& tab)
+list<pair<JewelPos,JewelPos>> Board::Fall(Board::IntTab& tab)
 {
-	// FIXME not implemented yet
-	for(int i=1;i!=size_;++i)
-		for(int j=0;j!=size_;++j)
+	list<pair<JewelPos,JewelPos>> ret;
+	for(int j=0;j!=size_;++j) {
+		int count = 0;
+		for(int i=size_-1;i>=0;--i) {
 			if(tab[i][j] == 0) {
-
+				++count;
+				continue;
 			}
+			if(count > 0) {
+				ret.push_back(pair<JewelPos,JewelPos>(JewelPos(i,j),JewelPos(i-count,j)));
+				tab[i-count][j] = tab[i][j];
+				tab[i][j] = 0;
+			}
+		}
+	}
+	return ret;
 }
 
 
-BoardEvent::BoardEvent(BoardEvent::EventType etype):
+BoardEvent::BoardEvent(const BoardEvent::EventType etype):
 	type(etype)
 {
 }

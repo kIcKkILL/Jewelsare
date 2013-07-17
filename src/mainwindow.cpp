@@ -1,4 +1,5 @@
 #include <QGridLayout>
+#include <QColor>
 #include <QPixmap>
 #include <QRadioButton>
 #include <QButtonGroup>
@@ -9,7 +10,10 @@
 #include "ui_mainwindow.h"
 #include "gamestate.h"
 
+#include <iostream>
+
 using namespace Jewelsare;
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -35,7 +39,6 @@ void MainWindow::StartHome_()
 
 	current_frame_ = new QFrame(ui->centralWidget);
 	QGridLayout* layout = new QGridLayout(current_frame_);
-
 	JewelButton *start_button,*score_button;
 	start_button = new JewelButton(current_frame_);
 	score_button = new JewelButton(current_frame_);
@@ -111,15 +114,19 @@ void MainWindow::GoClicked()
 
 	switch(difficulty_group_->checkedId()) {
 	case 0:
+		board_size_ = Board::kLargeSize;
 		game_state_->SetDifficulty(Difficulty::EASY);
 		break;
 	case 1:
+		board_size_ = Board::kMediumSize;
 		game_state_->SetDifficulty(Difficulty::MEDIUM);
 		break;
 	case 2:
+		board_size_ = Board::kSmallSize;
 		game_state_->SetDifficulty(Difficulty::HARD);
 		break;
 	default:
+		board_size_ = Board::kLargeSize;
 		game_state_->SetDifficulty(Difficulty::EASY);
 		break;
 	}
@@ -127,22 +134,34 @@ void MainWindow::GoClicked()
 	StartGame_();
 }
 
-void MainWindow::OnSwap(JewelPos pos,JewelWidget::SwapDirection direction)
+void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 {
+	JewelWidget *sender = (JewelWidget*)this->sender();
+	int x = sender->geometry().y()/50;
+	int y = sender->geometry().x()/50;
+	JewelPos pos(x,y);
 	auto events = game_state_->Swap(pos,direction);
 	bool swaped = false;
 	for(BoardEvent event : events) {
 		swaped = true;
-		//TODO update ui according to event
-		switch(event.type) {
-		case BoardEvent::EventType::DIE:
-		case BoardEvent::EventType::NEW:
-		case BoardEvent::EventType::FALL:
-			break;
-		}
+		EventDrawer(event);
 	}
 	if(!swaped) {
 		//TODO swap fail animation
+	}
+}
+
+void MainWindow::EventDrawer(BoardEvent event)
+{
+	switch (event.type) {
+	case BoardEvent::EventType::NEW:
+		for(JewelInfo info : event.GetNewPos()) {
+			map_[info.first.x][info.first.y].first = static_cast<Jewelsare::Color>(info.second);
+			map_[info.first.x][info.first.y].second -> SetColor(static_cast<Jewelsare::Color>(info.second));
+		}
+		break;
+	default:
+		break;
 	}
 }
 
@@ -153,8 +172,15 @@ void MainWindow::StartGame_()
 	current_frame_ = new QFrame(ui->centralWidget);
 
 	QLabel *board = new QLabel(current_frame_);
-	QGridLayout *jewel_layout = new QGridLayout(board);
-	board->setPixmap(QPixmap("board.png"));
+	//board->setPixmap(QPixmap("board.png"));
+	board->setGeometry(0,0,size().width(),size().height());
+	for(int i=0;i!=board_size_;++i)
+		for(int j=0;j!=board_size_;++j) {
+			map_[i][j].second = new JewelWidget(Color::NONE,board);
+			// [i][j] <-> [y][x]
+			map_[i][j].second->setGeometry(kJewelWidgetSize*j,kJewelWidgetSize*i,kJewelWidgetSize,kJewelWidgetSize);
+			connect(map_[i][j].second,SIGNAL(Swap(Jewelsare::SwapDirection)),this,SLOT(OnSwap(Jewelsare::SwapDirection)));
+		}
 	current_frame_->show();
-	game_state_->StartNewGame();
+	EventDrawer(game_state_->StartNewGame());
 }

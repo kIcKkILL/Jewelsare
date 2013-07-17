@@ -30,10 +30,10 @@ public:
 	virtual ~GameState();
 	void SetDifficulty(Difficulty);
 	void SetMode(Mode);
-	void StartNewGame();
+	BoardEvent StartNewGame();
 	void Pause();
 	void Resume();
-	std::list<BoardEvent> Swap(JewelPos,JewelWidget::SwapDirection direction);
+	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection direction);
 
 signals:
 	

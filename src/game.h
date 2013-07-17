@@ -18,7 +18,8 @@ class Game : public QObject
 	Q_OBJECT
 public:
 	explicit Game(const GameSettings &settings,QObject *parent = 0);
-	std::list<BoardEvent> Swap(JewelPos,JewelWidget::SwapDirection direction);
+	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection direction);
+	BoardEvent NewGame();
 	
 signals:
 	

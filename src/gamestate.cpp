@@ -26,13 +26,14 @@ GameState::~GameState() {
 
 }
 
-void GameState::StartNewGame()
+BoardEvent GameState::StartNewGame()
 {
 	game_ = new Game(*settings_);
 	state_ = INGAME;
+	return game_->NewGame();
 }
 
-std::list<BoardEvent> GameState::Swap(JewelPos pos,JewelWidget::SwapDirection direction)
+std::list<BoardEvent> GameState::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
 {
 	return game_->Swap(pos,direction);
 }

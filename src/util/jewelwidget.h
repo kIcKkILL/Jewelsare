@@ -3,19 +3,19 @@
 
 #include <QWidget>
 #include <QPointF>
-#include <QColor>
 
 namespace Jewelsare {
-	//enum class Color { NONE = 0, RED = Qt::red, CYAN = Qt::cyan, YELLOW = Qt::yellow, GREEN = Qt::green, BLUE = Qt::blue };
+	enum Color { NONE = 0, RED = 1, ORANGE = 2, YELLOW = 3, GREEN = 4, BLUE = 5 };
+	enum class SwapDirection { UP, RIGHT, DOWN, LEFT };
 }
 
 class JewelWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	enum class SwapDirection { UP, RIGHT, DOWN, LEFT };
-	explicit JewelWidget(QColor,QWidget *parent = 0);
-	QColor GetColor() const { return color_; }
+	explicit JewelWidget(Jewelsare::Color,QWidget *parent = 0);
+	Jewelsare::Color GetColor() const { return color_; }
+	void SetColor(Jewelsare::Color c) { color_ = c;}
 
 protected:
 	void paintEvent(QPaintEvent *);
@@ -23,12 +23,12 @@ protected:
 	void mouseMoveEvent(QMouseEvent *);
 
 signals:
-	void Swap(SwapDirection);
+	void Swap(Jewelsare::SwapDirection);
 	
 public slots:
 	
 private:
-	QColor color_;
+	Jewelsare::Color color_;
 	bool mouse_down_;
 	QPointF mouse_down_pos_;
 };

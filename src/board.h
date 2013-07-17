@@ -5,9 +5,6 @@
 #include <utility>
 #include <vector>
 
-class QMouseEvent;
-class QPaintEvent;
-
 namespace Jewelsare {
 
 struct JewelPos {
@@ -19,48 +16,52 @@ struct JewelPos {
 	int y;
 };
 
+
 typedef std::pair<JewelPos,int> JewelInfo;
 
 class Board;
 
 class BoardEvent {
-friend class Board;
 public:
 	enum class EventType {NEW,FALL,DIE};
 
-	BoardEvent(EventType etype);
-	const EventType type;
+	BoardEvent(const EventType etype);
+	EventType type;
 
 	std::list<JewelInfo> GetNewPos() const {return info1_;}
 	std::list<JewelPos> GetDiePos() const {return pos2_;}
+	std::list<std::pair<JewelPos,JewelPos>> GetFallPos() const {return fall_;}
+	void SetFallPos(std::list<std::pair<JewelPos,JewelPos>> fall) {fall_=fall;}
 	void SetNewPos(std::list<JewelInfo> list) {info1_ = list;}
 	void SetDiePos(std::list<JewelPos> list) {pos2_ = list;}
-	std::pair<std::list<JewelInfo>,std::list<JewelInfo>> GetFallPos();
 private:
+	std::list<std::pair<JewelPos,JewelPos>> fall_;
 	std::list<JewelInfo> info1_;
 	std::list<JewelPos> pos2_;
 };
 
 class Board
 {
-static const int kSmallSize = 8;
-static const int kMediumSize = 10;
-static const int kLargeSize = 12;
+typedef std::vector<std::vector<int>> IntTab;
 
 public:
+	static const int kSmallSize = 8;
+	static const int kMediumSize = 10;
+	static const int kLargeSize = 12;
+
 	enum Size { SMALL = kSmallSize, MEDIUM = kMediumSize, LARGE = kLargeSize };
 
 	explicit Board(Size);
-	std::list<BoardEvent> Swap(JewelPos,JewelWidget::SwapDirection);
+	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection);
 	void SetGenerationFactor(int f) {generation_factor_ = f;}
 	int GetColorAt(int x,int y) { return board_[x][y]; }
-	void Generate();
+	BoardEvent Init();
 
 private:
-	typedef std::vector<std::vector<int>> IntTab;
+	std::list<JewelInfo> Generate(IntTab &tab);
 	int PossibleSwap(const IntTab&) const;
 	std::list<JewelPos> Eliminatable(const IntTab&) const;
-	void Fall(IntTab&);
+	std::list<std::pair<JewelPos,JewelPos>> Fall(IntTab&);
 
 	IntTab board_;
 	int generation_factor_;

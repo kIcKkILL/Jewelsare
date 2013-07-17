@@ -6,33 +6,51 @@
 
 using namespace Jewelsare;
 
-Game::Game(const GameSettings &settings,QObject *parent)
+Game::Game(const GameSettings &settings,QObject *parent) :
+	QObject(parent)
 {
 	Board::Size boardsize;
 	switch(settings.difficulty) {
 	case Difficulty::EASY:
-		boardsize = Board::SMALL;
+		boardsize = Board::LARGE;
 		break;
 	case Difficulty::MEDIUM:
 		boardsize = Board::MEDIUM;
 		break;
 	case Difficulty::HARD:
-		boardsize = Board::LARGE;
+		boardsize = Board::SMALL;
 		break;
 	default:
 		break;
 	}
 	board_ = new Board(boardsize);
 	mode_logic_ = new TimeOutMode();
+	score_system_ = new ScoreSystem;
 	board_->SetGenerationFactor(mode_logic_->NextGeneration());
-	board_->Generate();
 	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame()));
 }
 
-std::list<BoardEvent> Game::Swap(JewelPos pos,JewelWidget::SwapDirection direction)
+std::list<BoardEvent> Game::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
 {
 	// update generation factor
 	board_->SetGenerationFactor(mode_logic_->NextGeneration());
+	std::list<BoardEvent> events = board_->Swap(pos,direction);
+	bool first = true;
+	for(BoardEvent event : events) {
+		if(first && event.type == BoardEvent::EventType::DIE) {
+			score_system_->FirstGain(event.GetDiePos().size());
+			first = false;
+		}
+		if(!first && event.type == BoardEvent::EventType::DIE)
+			score_system_->MoreGain(event.GetDiePos().size());
+	}
+	score_system_->FinishMove();
+	return events;
+}
+
+BoardEvent Game::NewGame()
+{
+	return board_->Init();
 }
 
 void Game::EndGame()
