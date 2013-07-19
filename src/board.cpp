@@ -145,52 +145,44 @@ int Board::PossibleSwap(const IntTab& tab) const
 
 list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 {
-	//FIXME wrong logic adding list!
 	list<JewelPos> ret;
-	// check vertically
+	// check horizontally
 	for(int i=0;i!=size_;++i)
 		for(int j=0;j!=size_;++j) {
+			if(tab[i][j] == 0)
+				continue;
+
 			int current = tab[i][j];
 			int k;
 			for(k=j;k!=size_;++k)
 				if(tab[i][k] != current)
 					break;
-			if(k-j >=3)
+			if(k-j >=3) {
 				// add them to list
-				for(int l = j;l<=k;++l) {
+				for(int l = j;l<=k-1;++l)
 					// check if already in list
-					bool duplicate = false;
-					for(JewelPos ele : ret)
-						if(ele.x == i && ele.y == j) {
-							duplicate = true;
-							break;
-						}
-
-					if(!duplicate)
-						ret.push_back(JewelPos(i,l));
-				}
+					ret.push_back(JewelPos(i,l));
+				j = k-1;
+			}
 		}
 
-	// check horizontally
+	// check vertically
 	for(int j=0;j!=size_;++j)
 		for(int i=0;i!=size_;++i) {
+			if(tab[i][j] == 0)
+				continue;
+
 			int current = tab[i][j];
 			int k;
 			for(k=i;k!=size_;++k)
 				if(tab[k][j] != current)
 					break;
-			if(k-i >=3)
+			if(k-i >=3) {
 				// add them to list
-				for(int l = i;l<=k;++l) {
-					bool duplicate = false;
-					for(JewelPos ele : ret)
-						if(ele.x == i && ele.y == j) {
-							duplicate = true;
-							break;
-						}
-					if(!duplicate)
-							ret.push_back(JewelPos(l,j));
-				}
+				for(int l = i;l<=k-1;++l)
+					ret.push_back(JewelPos(l,j));
+				i = k-1;
+			}
 		}
 	return ret;
 }
@@ -206,8 +198,8 @@ list<pair<JewelPos,JewelPos>> Board::Fall(Board::IntTab& tab)
 				continue;
 			}
 			if(count > 0) {
-				ret.push_back(pair<JewelPos,JewelPos>(JewelPos(i,j),JewelPos(i-count,j)));
-				tab[i-count][j] = tab[i][j];
+				ret.push_back(pair<JewelPos,JewelPos>(JewelPos(i,j),JewelPos(i+count,j)));
+				tab[i+count][j] = tab[i][j];
 				tab[i][j] = 0;
 			}
 		}

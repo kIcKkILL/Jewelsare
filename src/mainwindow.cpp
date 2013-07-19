@@ -9,8 +9,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "gamestate.h"
-
-#include <iostream>
+#include <cassert>
 
 using namespace Jewelsare;
 using namespace std;
@@ -140,25 +139,43 @@ void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 	int x = sender->geometry().y()/50;
 	int y = sender->geometry().x()/50;
 	JewelPos pos(x,y);
+
+	//swap first
+	if(!SwapJewelInMap_(x,y,direction))
+		return;
+	update();
+
 	auto events = game_state_->Swap(pos,direction);
 	bool swaped = false;
 	for(BoardEvent event : events) {
 		swaped = true;
-		EventDrawer(event);
+		DrawBoardEvent(event);
 	}
 	if(!swaped) {
-		//TODO swap fail animation
+		assert(SwapJewelInMap_(x,y,direction));
+		update();
 	}
 }
 
-void MainWindow::EventDrawer(BoardEvent event)
+void MainWindow::DrawBoardEvent(BoardEvent event)
 {
 	switch (event.type) {
 	case BoardEvent::EventType::NEW:
 		for(JewelInfo info : event.GetNewPos()) {
 			map_[info.first.x][info.first.y].first = static_cast<Jewelsare::Color>(info.second);
 			map_[info.first.x][info.first.y].second -> SetColor(static_cast<Jewelsare::Color>(info.second));
+			update();
 		}
+		break;
+	case BoardEvent::EventType::DIE:
+		for(JewelPos pos :event.GetDiePos()) {
+			map_[pos.x][pos.y].first = Color::NONE;
+			map_[pos.x][pos.y].second -> SetColor(Color::NONE);
+			update();
+		}
+		break;
+	case BoardEvent::EventType::FALL:
+		//TODO
 		break;
 	default:
 		break;
@@ -182,5 +199,60 @@ void MainWindow::StartGame_()
 			connect(map_[i][j].second,SIGNAL(Swap(Jewelsare::SwapDirection)),this,SLOT(OnSwap(Jewelsare::SwapDirection)));
 		}
 	current_frame_->show();
-	EventDrawer(game_state_->StartNewGame());
+	DrawBoardEvent(game_state_->StartNewGame());
+}
+
+bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)
+{
+	switch (direction) {
+	case SwapDirection::DOWN: {
+		if(x == board_size_-1)
+			return false;
+		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		map_[x][y] = map_[x+1][y];
+		map_[x+1][y] = temp;
+		const QRect geometry_temp = map_[x+1][y].second->geometry();
+		map_[x+1][y].second->setGeometry(map_[x][y].second->geometry());
+		map_[x][y].second->setGeometry(geometry_temp);
+		break;
+	}
+	case SwapDirection::UP: {
+		if(x == 0)
+			return false;
+		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		map_[x][y] = map_[x-1][y];
+		map_[x-1][y] = temp;
+		const QRect geometry_temp = map_[x-1][y].second->geometry();
+		map_[x-1][y].second->setGeometry(map_[x][y].second->geometry());
+		map_[x][y].second->setGeometry(geometry_temp);
+		break;
+	}
+	case SwapDirection::LEFT: {
+		if(y == 0)
+			return false;
+		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		map_[x][y] = map_[x][y-1];
+		map_[x][y-1] = temp;
+		const QRect geometry_temp = map_[x][y-1].second->geometry();
+		map_[x][y-1].second->setGeometry(map_[x][y].second->geometry());
+		map_[x][y].second->setGeometry(geometry_temp);
+		break;
+	}
+	case SwapDirection::RIGHT: {
+		if(y == board_size_-1)
+			return false;
+		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		map_[x][y] = map_[x][y+1];
+		map_[x][y+1] = temp;
+		const QRect geometry_temp = map_[x][y+1].second->geometry();
+		map_[x][y+1].second->setGeometry(map_[x][y].second->geometry());
+		map_[x][y].second->setGeometry(geometry_temp);
+		break;
+	}
+	default:
+		return false;
+		break;
+	}
+	// No special case happened where swap outside the board
+	return true;
 }

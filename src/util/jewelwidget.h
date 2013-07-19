@@ -21,6 +21,7 @@ protected:
 	void paintEvent(QPaintEvent *);
 	void mousePressEvent(QMouseEvent *);
 	void mouseMoveEvent(QMouseEvent *);
+	void mouseReleaseEvent(QMouseEvent *);
 
 signals:
 	void Swap(Jewelsare::SwapDirection);
