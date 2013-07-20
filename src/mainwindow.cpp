@@ -165,22 +165,27 @@ void MainWindow::DrawBoardEventent(BoardEvent event)
 		for(JewelInfo info : event.GetNewPos()) {
 			map_[info.first.x][info.first.y].first = static_cast<Jewelsare::Color>(info.second);
 			map_[info.first.x][info.first.y].second -> SetColor(static_cast<Jewelsare::Color>(info.second));
-			update();
 		}
 		break;
 	case BoardEvent::EventType::DIE:
 		for(JewelPos pos :event.GetDiePos()) {
 			map_[pos.x][pos.y].first = Color::NONE;
 			map_[pos.x][pos.y].second -> SetColor(Color::NONE);
-			update();
 		}
 		break;
 	case BoardEvent::EventType::FALL:
-		//TODO
+		for(pair<JewelPos,JewelPos> fall_pos : event.GetFallPos()) {
+			map_[fall_pos.second.x][fall_pos.second.y].first =
+					(map_[fall_pos.first.x][fall_pos.first.y].first);
+			map_[fall_pos.second.x][fall_pos.second.y].second->SetColor(map_[fall_pos.first.x][fall_pos.first.y].second->GetColor());
+			map_[fall_pos.first.x][fall_pos.first.y].first = static_cast<Jewelsare::Color>(0);
+			map_[fall_pos.first.x][fall_pos.first.y].second->SetColor(Color::NONE);
+		}
 		break;
 	default:
 		break;
 	}
+	update();
 }
 
 void MainWindow::StartGame_()
