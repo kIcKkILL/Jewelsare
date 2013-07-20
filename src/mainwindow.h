@@ -36,10 +36,10 @@ private slots:
 private:
 	static const int kJewelWidgetSize = 50;
 	// Three StartXXX functions affects only GUI
-	void DrawBoardEvent(Jewelsare::BoardEvent);
 	void StartHome_();
 	void StartSelect_();
 	void StartGame_();
+	void DrawBoardEventent(Jewelsare::BoardEvent);
 	bool SwapJewelInMap_(int x,int y,Jewelsare::SwapDirection);
 	QFrame *current_frame_;
 	QButtonGroup *mode_group_;

@@ -59,11 +59,11 @@ void JewelWidget::mouseMoveEvent(QMouseEvent *event)
 		const qreal oy = mouse_down_pos_.y();
 		const qreal dx = pos.x() - ox;
 		const qreal dy = pos.y() - oy;
-		static const double kMarginFactor = 1.1;
-		if(dx > dy) {
+		static const double kMarginFactor = 1.0;
+		if(abs(dx) > abs(dy)) {
 			if(dx > 0 && ox+dx > (this->size().width()) *kMarginFactor)
 				emit(Swap(Jewelsare::SwapDirection::RIGHT));
-			else if (dx < 0 && ox+dx < 0)
+			else if (dx < 0 && ox+dx < 0) //FIXME it doesn't fit kMarginFactor for now
 				emit(Swap(Jewelsare::SwapDirection::LEFT));
 			else
 				return;
@@ -71,7 +71,7 @@ void JewelWidget::mouseMoveEvent(QMouseEvent *event)
 		else {
 			if(dy > 0 && oy+dy > (double)(this->size().height()) *kMarginFactor)
 				emit(Swap(Jewelsare::SwapDirection::DOWN));
-			else if (dy < 0 && oy+dy < 0)
+			else if (dy < 0 && oy+dy < 0) //FIXME it doesn't fit kMarginFactor for now
 				emit(Swap(Jewelsare::SwapDirection::UP));
 			else
 				return;

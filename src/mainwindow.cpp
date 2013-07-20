@@ -9,6 +9,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "gamestate.h"
+
 #include <cassert>
 
 using namespace Jewelsare;
@@ -149,7 +150,7 @@ void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 	bool swaped = false;
 	for(BoardEvent event : events) {
 		swaped = true;
-		DrawBoardEvent(event);
+		DrawBoardEventent(event);
 	}
 	if(!swaped) {
 		assert(SwapJewelInMap_(x,y,direction));
@@ -157,7 +158,7 @@ void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 	}
 }
 
-void MainWindow::DrawBoardEvent(BoardEvent event)
+void MainWindow::DrawBoardEventent(BoardEvent event)
 {
 	switch (event.type) {
 	case BoardEvent::EventType::NEW:
@@ -199,7 +200,7 @@ void MainWindow::StartGame_()
 			connect(map_[i][j].second,SIGNAL(Swap(Jewelsare::SwapDirection)),this,SLOT(OnSwap(Jewelsare::SwapDirection)));
 		}
 	current_frame_->show();
-	DrawBoardEvent(game_state_->StartNewGame());
+	DrawBoardEventent(game_state_->StartNewGame());
 }
 
 bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)
