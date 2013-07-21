@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include "util/countdowntimer.h"
 
 namespace Jewelsare {
 
@@ -18,16 +19,23 @@ signals:
 class TimeOutMode : public ModeLogic {
 	Q_OBJECT
 public:
-	TimeOutMode()
-	{
-		timer_.start(5000);
-		connect(&timer_,SIGNAL(timeout()),this,SIGNAL(TimeOut()));
-	}
-	int NextGeneration() { return 5; } //TODO make it more complicated
+	TimeOutMode();
+	int NextGeneration() { return 4; } //TODO make it more complicated
 signals:
 	void TimeOut();
 private:
-	QTimer timer_;
+	CountdownTimer *timer_;
+};
+
+class FastReactionMode : public ModeLogic {
+	Q_OBJECT
+public:
+	FastReactionMode()
+	{
+		// TODO
+	}
+	int NextGeneration() { return 5; }
+	// TODO
 };
 
 }

@@ -1,3 +1,4 @@
+#include <QPropertyAnimation>
 #include <QGridLayout>
 #include <QColor>
 #include <QPixmap>
@@ -10,6 +11,7 @@
 #include "ui_mainwindow.h"
 #include "gamestate.h"
 
+// DEBUG USE
 #include <cassert>
 
 using namespace Jewelsare;
@@ -17,7 +19,9 @@ using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
-	ui(new Ui::MainWindow)
+	ui(new Ui::MainWindow),
+	ui_drawing_(false),
+	animation_drawing_(false)
 {
 	ui->setupUi(this);
 
@@ -136,11 +140,16 @@ void MainWindow::GoClicked()
 
 void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 {
+	if(ui_drawing_)
+		return;
+
+	game_state_->Pause();
 	JewelWidget *sender = (JewelWidget*)this->sender();
 	int x = sender->geometry().y()/50;
 	int y = sender->geometry().x()/50;
 	JewelPos pos(x,y);
 
+	ui_drawing_ = true;
 	//swap first
 	if(!SwapJewelInMap_(x,y,direction))
 		return;
@@ -156,10 +165,14 @@ void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 		assert(SwapJewelInMap_(x,y,direction));
 		update();
 	}
+
+	game_state_->Resume();
+	ui_drawing_ = false;
 }
 
 void MainWindow::DrawBoardEventent(BoardEvent event)
 {
+	// TODO animate it
 	switch (event.type) {
 	case BoardEvent::EventType::NEW:
 		for(JewelInfo info : event.GetNewPos()) {
@@ -169,8 +182,23 @@ void MainWindow::DrawBoardEventent(BoardEvent event)
 		break;
 	case BoardEvent::EventType::DIE:
 		for(JewelPos pos :event.GetDiePos()) {
+			JewelWidget *widget = map_[pos.x][pos.y].second;
+
+			/* animation
+			int ox=widget->x(), oy = widget->y();
+			QPropertyAnimation *animation = new QPropertyAnimation(widget,"geometry");
+			animation->setDuration(500);
+			animation->setEndValue((QRect(ox+kJewelWidgetSize/2,oy+kJewelWidgetSize/2,0,0)));
+			animation->setStartValue((QRect(ox,oy,kJewelWidgetSize,kJewelWidgetSize)));
+			animation_drawing_ = true;
+			animation->start();
+			connect(animation,&QPropertyAnimation::finished,[=](){
+				animation_drawing_ = false;
+			});
+			*/
+
 			map_[pos.x][pos.y].first = Color::NONE;
-			map_[pos.x][pos.y].second -> SetColor(Color::NONE);
+			widget -> SetColor(Color::NONE);
 		}
 		break;
 	case BoardEvent::EventType::FALL:
@@ -190,13 +218,15 @@ void MainWindow::DrawBoardEventent(BoardEvent event)
 
 void MainWindow::StartGame_()
 {
-	//TODO Set new UI frame
+	// Set new UI frame
 	delete current_frame_;
 	current_frame_ = new QFrame(ui->centralWidget);
 
 	QLabel *board = new QLabel(current_frame_);
 	//board->setPixmap(QPixmap("board.png"));
-	board->setGeometry(0,0,size().width(),size().height());
+	board->setMinimumHeight(kJewelWidgetSize*(board_size_+1));
+	board->setMinimumWidth(kJewelWidgetSize*(board_size_+1));
+	board->setGeometry(0,0,size().width(),size().height()); // FIXME use layout to manage widgets(excluding JewelWidgets)
 	for(int i=0;i!=board_size_;++i)
 		for(int j=0;j!=board_size_;++j) {
 			map_[i][j].second = new JewelWidget(Color::NONE,board);
@@ -210,11 +240,12 @@ void MainWindow::StartGame_()
 
 bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)
 {
+	// TODO animate it
 	switch (direction) {
 	case SwapDirection::DOWN: {
 		if(x == board_size_-1)
 			return false;
-		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		const pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
 		map_[x][y] = map_[x+1][y];
 		map_[x+1][y] = temp;
 		const QRect geometry_temp = map_[x+1][y].second->geometry();
@@ -225,7 +256,7 @@ bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)
 	case SwapDirection::UP: {
 		if(x == 0)
 			return false;
-		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		const pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
 		map_[x][y] = map_[x-1][y];
 		map_[x-1][y] = temp;
 		const QRect geometry_temp = map_[x-1][y].second->geometry();
@@ -236,7 +267,7 @@ bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)
 	case SwapDirection::LEFT: {
 		if(y == 0)
 			return false;
-		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		const pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
 		map_[x][y] = map_[x][y-1];
 		map_[x][y-1] = temp;
 		const QRect geometry_temp = map_[x][y-1].second->geometry();
@@ -247,7 +278,7 @@ bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)
 	case SwapDirection::RIGHT: {
 		if(y == board_size_-1)
 			return false;
-		const std::pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
+		const pair<Jewelsare::Color,JewelWidget*> temp = map_[x][y];
 		map_[x][y] = map_[x][y+1];
 		map_[x][y+1] = temp;
 		const QRect geometry_temp = map_[x][y+1].second->geometry();

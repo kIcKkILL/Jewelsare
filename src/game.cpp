@@ -24,7 +24,17 @@ Game::Game(const GameSettings &settings,QObject *parent) :
 		break;
 	}
 	board_ = new Board(boardsize);
-	mode_logic_ = new TimeOutMode();
+
+	// Create appropriate GameLogic
+	switch (settings.mode) {
+	case Mode::TIME_LIMIT:
+		mode_logic_ = new TimeOutMode();
+		break;
+	case Mode::FAST_REACTION:
+		mode_logic_ = new FastReactionMode();
+		break;
+	}
+
 	score_system_ = new ScoreSystem;
 	board_->SetGenerationFactor(mode_logic_->NextGeneration());
 	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame()));

@@ -34,6 +34,9 @@ private slots:
 	void OnSwap(Jewelsare::SwapDirection);
     
 private:
+	bool ui_drawing_; // lock
+	bool animation_drawing_; // internal lock
+
 	static const int kJewelWidgetSize = 50;
 	// Three StartXXX functions affects only GUI
 	void StartHome_();

@@ -33,6 +33,11 @@ BoardEvent GameState::StartNewGame()
 	return game_->NewGame();
 }
 
+void GameState::Pause()
+{
+	//TODO pause
+}
+
 std::list<BoardEvent> GameState::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
 {
 	return game_->Swap(pos,direction);

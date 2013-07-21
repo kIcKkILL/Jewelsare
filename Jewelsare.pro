@@ -22,7 +22,8 @@ SOURCES += src/main.cpp\
     src/scoresystem.cpp \
     src/util/jewelbutton.cpp \
 	src/util/jewelwidget.cpp \
-    src/game.cpp
+    src/game.cpp \
+    src/util/countdowntimer.cpp
 
 HEADERS  += src/mainwindow.h \
     src/gamestate.h \
@@ -31,7 +32,8 @@ HEADERS  += src/mainwindow.h \
     src/util/jewelwidget.h \
     src/scoresystem.h \
     src/util/jewelbutton.h \
-    src/game.h
+    src/game.h \
+    src/util/countdowntimer.h
 
 FORMS    += src/mainwindow.ui
 
