@@ -37,7 +37,6 @@ Game::Game(const GameSettings &settings,QObject *parent) :
 
 	score_system_ = new ScoreSystem;
 	board_->SetGenerationFactor(mode_logic_->NextGeneration());
-	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame()));
 }
 
 std::list<BoardEvent> Game::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
@@ -60,7 +59,19 @@ std::list<BoardEvent> Game::Swap(JewelPos pos,Jewelsare::SwapDirection direction
 
 BoardEvent Game::NewGame()
 {
+	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame()));
+	connect(mode_logic_,SIGNAL(TimeTick(int)),this,SIGNAL(TimeTick(int)));
 	return board_->Init();
+}
+
+void Game::Pause()
+{
+	mode_logic_->Pause();
+}
+
+void Game::Resume()
+{
+	mode_logic_->Resume();
 }
 
 void Game::EndGame()

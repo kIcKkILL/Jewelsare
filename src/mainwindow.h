@@ -18,6 +18,7 @@ class QFrame;
 class QButtonGroup;
 class QColor;
 class QGridLayout;
+class QLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -31,6 +32,7 @@ private slots:
 	void StartClicked();
 	void ScoreClicked();
 	void GoClicked();
+	void UpdateTimeDisplay(int);
 	void OnSwap(Jewelsare::SwapDirection);
     
 private:
@@ -44,10 +46,14 @@ private:
 	void StartGame_();
 	void DrawBoardEventent(Jewelsare::BoardEvent);
 	bool SwapJewelInMap_(int x,int y,Jewelsare::SwapDirection);
+
 	QFrame *current_frame_;
 	QButtonGroup *mode_group_;
 	QButtonGroup *difficulty_group_;
+	QLabel *score_display_;
+	QLabel *time_display_;
     Ui::MainWindow *ui;
+
 	Jewelsare::GameState *game_state_;
 	std::pair<Jewelsare::Color,JewelWidget*> map_[Jewelsare::Board::kLargeSize][Jewelsare::Board::kLargeSize];
 	int board_size_;

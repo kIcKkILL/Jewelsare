@@ -20,8 +20,11 @@ public:
 	explicit Game(const GameSettings &settings,QObject *parent = 0);
 	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection direction);
 	BoardEvent NewGame();
+	void Pause();
+	void Resume();
 	
 signals:
+	void TimeTick(int);
 	
 public slots:
 	void EndGame();

@@ -138,6 +138,12 @@ void MainWindow::GoClicked()
 	StartGame_();
 }
 
+void MainWindow::UpdateTimeDisplay(int remain)
+{
+	time_display_->setText(QString::number(remain));
+	update();
+}
+
 void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 {
 	if(ui_drawing_)
@@ -220,13 +226,32 @@ void MainWindow::StartGame_()
 {
 	// Set new UI frame
 	delete current_frame_;
+
 	current_frame_ = new QFrame(ui->centralWidget);
+	QFrame *right_frame = new QFrame(current_frame_);
+	QGridLayout *layout = new QGridLayout(current_frame_);
+	QGridLayout *right_layout = new QGridLayout(right_frame);
 
 	QLabel *board = new QLabel(current_frame_);
-	//board->setPixmap(QPixmap("board.png"));
+	board->setPixmap(QPixmap("../res/board.png"));
 	board->setMinimumHeight(kJewelWidgetSize*(board_size_+1));
 	board->setMinimumWidth(kJewelWidgetSize*(board_size_+1));
-	board->setGeometry(0,0,size().width(),size().height()); // FIXME use layout to manage widgets(excluding JewelWidgets)
+
+	QLabel *label1 = new QLabel(tr("Score"),right_frame);
+	score_display_ = new QLabel(right_frame);
+
+	QLabel *label3 = new QLabel(tr("Time Left"),right_frame);
+	time_display_ =  new QLabel(right_frame);
+
+	right_layout->addWidget(label1,0,0);
+	right_layout->addWidget(score_display_,1,0);
+	right_layout->addWidget(label3,2,0);
+	right_layout->addWidget(time_display_,3,0);
+
+	layout->addWidget(board,0,0);
+	layout->addWidget(right_frame,0,1);
+
+
 	for(int i=0;i!=board_size_;++i)
 		for(int j=0;j!=board_size_;++j) {
 			map_[i][j].second = new JewelWidget(Color::NONE,board);
@@ -236,6 +261,7 @@ void MainWindow::StartGame_()
 		}
 	current_frame_->show();
 	DrawBoardEventent(game_state_->StartNewGame());
+	connect(game_state_,SIGNAL(TimeTick(int)),this,SLOT(UpdateTimeDisplay(int)));
 }
 
 bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)

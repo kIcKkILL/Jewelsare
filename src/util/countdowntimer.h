@@ -22,6 +22,7 @@ public:
 
 signals:
 	void TimeOut();
+	void Tick();
 	
 private slots:
 	void InternalTimerTimeout_();

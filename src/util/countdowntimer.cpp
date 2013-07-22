@@ -1,23 +1,26 @@
 #include "countdowntimer.h"
 #include <QTimer>
+#include <cassert>
 
 CountdownTimer::CountdownTimer(int sec,QObject *parent) :
 	QObject(parent),
-	dead_(true),
+	remain_sec_(0),
 	paused_(false),
-	remain_sec_(0)
+	dead_(true)
 {
 	tick_ = new QTimer(this);
 	tick_->setInterval(1000);
 	tick_->setSingleShot(false); // repeat ticks
-	connect(tick_,SIGNAL(timeout(QPrivateSignal)),this,SLOT(InternalTimerTimeout_()));
+	connect(tick_,SIGNAL(timeout()),this,SLOT(InternalTimerTimeout_()));
 	SetTimeRemained(sec);
 }
 
 void CountdownTimer::Start()
 {
-	if(dead_)
-		tick_->start(remain_sec_);
+	if(dead_) {
+		dead_ = false;
+		tick_->start();
+	}
 }
 
 void CountdownTimer::Pause()
@@ -32,15 +35,17 @@ void CountdownTimer::Resume()
 
 void CountdownTimer::InternalTimerTimeout_()
 {
-	if(!dead_ || !paused_)
+	if(!dead_ && !paused_) {
+		emit(Tick());
 		if(--remain_sec_ == 0) {
 			emit(TimeOut());
 			dead_ = true;
 		}
+	}
 }
 
 void CountdownTimer::SetTimeRemained(int sec)
 {
-	if(sec > 0)
+	if(dead_ && sec > 0)
 		remain_sec_ = sec;
 }

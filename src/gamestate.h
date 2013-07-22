@@ -36,7 +36,8 @@ public:
 	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection direction);
 
 signals:
-	
+	void TimeTick(int remain);
+
 public slots:
 
 private:
