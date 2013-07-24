@@ -17,7 +17,15 @@ struct GameSettings {
 class Game;
 
 class HighScoresStorage {
+	// TODO Implement this class
+public:
+	HighScoresStorage() {}
+	void NewScore(int) {}
+	int GetScore(int rank) {return -1;}
 
+	// copy inhibited
+	HighScoresStorage(const HighScoresStorage&) = delete;
+	HighScoresStorage& operator=(const HighScoresStorage&) = delete;
 };
 
 class GameState : public QObject
@@ -35,8 +43,13 @@ public:
 	void Resume();
 	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection direction);
 
+	// copy inhibited
+	GameState(const GameState&) = delete;
+	GameState& operator=(const GameSTate&) = delete;
+
 signals:
 	void TimeTick(int remain);
+	void ScoreUpdated(int new_score);
 
 public slots:
 

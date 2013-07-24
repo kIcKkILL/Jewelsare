@@ -30,6 +30,7 @@ BoardEvent GameState::StartNewGame()
 {
 	game_ = new Game(*settings_);
 	connect(game_,SIGNAL(TimeTick(int)),this,SIGNAL(TimeTick(int)));
+	connect(game_,SIGNAL(ScoreUpdated(int)),this,SIGNAL(ScoreUpdated(int)));
 	state_ = INGAME;
 	return game_->NewGame();
 }

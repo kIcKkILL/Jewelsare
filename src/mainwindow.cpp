@@ -138,6 +138,11 @@ void MainWindow::GoClicked()
 	StartGame_();
 }
 
+void MainWindow::AbortClicked()
+{
+	// TODO stop game and return home
+}
+
 void MainWindow::UpdateTimeDisplay(int remain)
 {
 	time_display_->setText(QString::number(remain));
@@ -243,14 +248,18 @@ void MainWindow::StartGame_()
 	QLabel *label3 = new QLabel(tr("Time Left"),right_frame);
 	time_display_ =  new QLabel(right_frame);
 
+	JewelButton *abort_button = new JewelButton(right_frame);
+	abort_button->setText(tr("Abort"));
+	connect(abort_button,SIGNAL(clicked()),this,SLOT(AbortClicked()));
+
 	right_layout->addWidget(label1,0,0);
 	right_layout->addWidget(score_display_,1,0);
 	right_layout->addWidget(label3,2,0);
 	right_layout->addWidget(time_display_,3,0);
+	right_layout->addWidget(abort_button,4,0);
 
 	layout->addWidget(board,0,0);
 	layout->addWidget(right_frame,0,1);
-
 
 	for(int i=0;i!=board_size_;++i)
 		for(int j=0;j!=board_size_;++j) {
@@ -262,6 +271,13 @@ void MainWindow::StartGame_()
 	current_frame_->show();
 	DrawBoardEventent(game_state_->StartNewGame());
 	connect(game_state_,SIGNAL(TimeTick(int)),this,SLOT(UpdateTimeDisplay(int)));
+	connect(game_state_,SIGNAL(ScoreUpdated(int)),this,SLOT(UpdateScore_(int)));
+}
+
+void MainWindow::UpdateScore_(int new_score)
+{
+	score_display_->setText(QString::number(new_score));
+	update();
 }
 
 bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)

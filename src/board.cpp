@@ -145,6 +145,7 @@ int Board::PossibleSwap(const IntTab& tab) const
 
 list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 {
+	bool eliminated[kLargeSize][kLargeSize] = {0};
 	list<JewelPos> ret;
 	// check horizontally
 	for(int i=0;i!=size_;++i)
@@ -154,14 +155,15 @@ list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 
 			int current = tab[i][j];
 			int k;
-			for(k=j;k!=size_;++k)
+			for(k=j+1;k!=size_;++k)
 				if(tab[i][k] != current)
 					break;
 			if(k-j >=3) {
 				// add them to list
-				for(int l = j;l<=k-1;++l)
-					// check if already in list
+				for(int l = j;l<=k-1;++l) {
 					ret.push_back(JewelPos(i,l));
+					eliminated[i][l] = true;
+				}
 				j = k-1;
 			}
 		}
@@ -180,7 +182,9 @@ list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 			if(k-i >=3) {
 				// add them to list
 				for(int l = i;l<=k-1;++l)
-					ret.push_back(JewelPos(l,j));
+					// Fix duplicate introduced by checking horizontally
+					if(!eliminated[l][j])
+						ret.push_back(JewelPos(l,j));
 				i = k-1;
 			}
 		}

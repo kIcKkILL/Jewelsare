@@ -13,6 +13,14 @@ TimeOutMode::TimeOutMode()
 	timer_->Start();
 }
 
+int TimeOutMode::NextGeneration()
+{
+	if(timer_->GetTimeRemained() >= 90)
+		return 3;
+	else
+		return 4;
+}
+
 void TimeOutMode::Pause()
 {
 	timer_->Pause();

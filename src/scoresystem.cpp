@@ -2,23 +2,23 @@
 using namespace Jewelsare;
 
 ScoreSystem::ScoreSystem() :
-	combo(0)
+	combo_(0)
 {
 }
 
 void ScoreSystem::FirstGain(int gain)
 {
 	total_score_ += gain;
-	++combo;
+	++combo_;
 }
 
 void ScoreSystem::MoreGain(int gain)
 {
-	total_score_ += gain + combo;
-	++combo;
+	total_score_ += gain + combo_;
+	++combo_;
 }
 
 void ScoreSystem::FinishMove()
 {
-	combo = 0;
+	combo_ = 0;
 }

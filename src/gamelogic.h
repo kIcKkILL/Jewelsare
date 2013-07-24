@@ -14,6 +14,11 @@ public:
 	virtual int NextGeneration() = 0;
 	virtual void Pause() = 0;
 	virtual void Resume() = 0;
+
+	// copy inhibited
+	ModeLogic(const ModeLogic&) = delete;
+	ModeLogic& operator=(const ModeLogic&) = delete;
+
 signals:
 	void TimeTick(int);
 	void TimeOut();
@@ -22,8 +27,8 @@ signals:
 class TimeOutMode : public ModeLogic {
 	Q_OBJECT
 public:
-	TimeOutMode();
-	int NextGeneration() { return 4; } //TODO make it more complicated
+	explicit TimeOutMode();
+	int NextGeneration();
 	void Pause();
 	void Resume();
 signals:
@@ -37,6 +42,8 @@ private:
 class FastReactionMode : public ModeLogic {
 	Q_OBJECT
 public:
+	void IncreaseDifficulty();
+	void ReduceDifficulty();
 	FastReactionMode()
 	{
 		// TODO

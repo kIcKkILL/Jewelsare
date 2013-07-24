@@ -44,14 +44,17 @@ std::list<BoardEvent> Game::Swap(JewelPos pos,Jewelsare::SwapDirection direction
 	// update generation factor
 	board_->SetGenerationFactor(mode_logic_->NextGeneration());
 	std::list<BoardEvent> events = board_->Swap(pos,direction);
-	bool first = true;
+	bool first = true; //Processing First BoardEvent
 	for(BoardEvent event : events) {
 		if(first && event.type == BoardEvent::EventType::DIE) {
 			score_system_->FirstGain(event.GetDiePos().size());
+			emit(ScoreUpdated(score_system_->GetScore()));
 			first = false;
 		}
-		if(!first && event.type == BoardEvent::EventType::DIE)
+		else if(!first && event.type == BoardEvent::EventType::DIE) {
 			score_system_->MoreGain(event.GetDiePos().size());
+			emit(ScoreUpdated(score_system_->GetScore()));
+		}
 	}
 	score_system_->FinishMove();
 	return events;

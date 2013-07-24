@@ -32,6 +32,8 @@ private slots:
 	void StartClicked();
 	void ScoreClicked();
 	void GoClicked();
+	void AbortClicked();
+	void UpdateScore_(int new_score);
 	void UpdateTimeDisplay(int);
 	void OnSwap(Jewelsare::SwapDirection);
     

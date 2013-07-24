@@ -34,6 +34,11 @@ public:
 	void SetFallPos(std::list<std::pair<JewelPos,JewelPos>> fall) {fall_=fall;}
 	void SetNewPos(std::list<JewelInfo> list) {info1_ = list;}
 	void SetDiePos(std::list<JewelPos> list) {pos2_ = list;}
+
+	// default copy behaviors
+	BoardEvent(const BoardEvent&) = default;
+	BoardEvent& operator=(const BoardEvent&) = default;
+
 private:
 	std::list<std::pair<JewelPos,JewelPos>> fall_;
 	std::list<JewelInfo> info1_;
@@ -56,6 +61,10 @@ public:
 	void SetGenerationFactor(int f) {generation_factor_ = f;}
 	int GetColorAt(int x,int y) { return board_[x][y]; }
 	BoardEvent Init();
+
+	// copy inhibited
+	Board(const Board&) = delete;
+	Board& operator=(const Board&) = delete;
 
 private:
 	std::list<JewelInfo> Generate(IntTab &tab);

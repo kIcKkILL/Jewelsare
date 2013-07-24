@@ -11,8 +11,12 @@ public:
 	void FinishMove();
 	int GetScore() { return total_score_; }
 
+	// copy inhibited
+	ScoreSystem(const ScoreSystem&) = delete;
+	ScoreSystem& operator=(const ScoreSystem&) = delete;
+
 private:
-	int combo;
+	int combo_;
 	int total_score_;
 };
 

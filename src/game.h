@@ -23,7 +23,12 @@ public:
 	void Pause();
 	void Resume();
 	
+	// copy inhibited
+	Game(const Game&) = delete;
+	Game& operator=(const Game&) = delete;
+
 signals:
+	void ScoreUpdated(int);
 	void TimeTick(int);
 	
 public slots:
