@@ -36,11 +36,11 @@ void CountdownTimer::Resume()
 void CountdownTimer::InternalTimerTimeout_()
 {
 	if(!dead_ && !paused_) {
-		emit(Tick());
 		if(--remain_sec_ == 0) {
 			emit(TimeOut());
 			dead_ = true;
 		}
+		emit(Tick());
 	}
 }
 
