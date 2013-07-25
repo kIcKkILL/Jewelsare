@@ -17,7 +17,7 @@ class Game : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Game(const GameSettings &settings,QObject *parent = 0);
+	explicit Game(const GameSettings &settings,QObject *parent = 0); // doesn't start a new game
 	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection direction);
 	BoardEvent NewGame();
 	void Pause();

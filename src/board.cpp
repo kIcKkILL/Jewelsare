@@ -49,17 +49,18 @@ list<BoardEvent> Board::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
 	default:
 		break;
 	}
-	// get list of eliminated jewelpos
+	// get list of to-be-eliminated jewelpos
 	list<JewelPos> deleted = Eliminatable(tab);
-	// if not a valid swap
+	// if not a valid swap, return blank list
 	if(deleted.size()==0)
-		return events; // return blank list
+		return events;
+
 	// a valid swap
 	board_ = tab;
 	BoardEvent new_event(BoardEvent::EventType::DIE);
 	new_event.SetDiePos(deleted);
 	events.push_back(new_event);
-	// elimination
+	// first elimination
 	for(JewelPos pos :deleted)
 		board_[pos.x][pos.y] = 0;
 	// fall->eliminate->fall->eliminate-> ...
@@ -129,6 +130,7 @@ int Board::PossibleSwap(const IntTab& tab)
 			tab2[i][j] = tab2[i][j+1];
 			tab2[i][j+1] = tab[i][j];
 			if(!Eliminatable(tab2).empty()) {
+				// record it for hint use
 				last_possible_swap_.x = i;
 				last_possible_swap_.y = j;
 				++count;
@@ -137,13 +139,14 @@ int Board::PossibleSwap(const IntTab& tab)
 			tab2[i][j] = tab[i][j];
 			tab2[i][j+1] = tab[i][j+1];
 		}
-
+	// swap down
 	for(int j=0;j!=size_;++j)
 		for(int i=0;i!=size_-1;++i) {
 			// swap
 			tab2[i][j] = tab2[i+1][j];
 			tab2[i+1][j] = tab[i][j];
 			if(!Eliminatable(tab2).empty()) {
+				// record it for hint use
 				last_possible_swap_.x = i;
 				last_possible_swap_.y = j;
 				++count;
@@ -205,6 +208,7 @@ list<JewelPos> Board::Eliminatable(const Board::IntTab& tab) const
 
 list<pair<JewelPos,JewelPos>> Board::Fall(Board::IntTab& tab)
 {
+	// record how many blocks a jewel has to fall
 	list<pair<JewelPos,JewelPos>> ret;
 	for(int j=0;j!=size_;++j) {
 		int count = 0;

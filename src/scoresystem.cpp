@@ -8,13 +8,13 @@ ScoreSystem::ScoreSystem() :
 
 void ScoreSystem::FirstGain(int gain)
 {
-	total_score_ += gain;
+	total_score_ += gain+(gain-3);
 	++combo_;
 }
 
 void ScoreSystem::MoreGain(int gain)
 {
-	total_score_ += gain + combo_;
+	total_score_ += gain+(gain-3) + combo_*2;
 	++combo_;
 }
 

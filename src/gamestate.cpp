@@ -40,8 +40,11 @@ void GameState::SetMode(Mode mode)
 	settings_->mode = mode;
 }
 
-GameState::~GameState() {
-
+GameState::~GameState()
+{
+	if(game_)
+		delete game_;
+	delete settings_;
 }
 
 BoardEvent GameState::StartNewGame()
@@ -101,20 +104,22 @@ bool HighScoresStorage::NewScore(Mode mode,int new_score)
 	// Determine mode
 	vector<int> *target = mode==Mode::TIME_LIMIT? &tl_scores_:&fr_scores_;
 	for(int score: *target)
+		// is_not_smallest
 		if(score < new_score) {
 			ret = true;
 			break;
 		}
 
 	if(ret) {
+		// get the new score to correct position
 		target->push_back(new_score);
 		sort(target->begin(),target->end(),[=](int a,int b){
+			// descending sort
 			return a>=b;
 		});
 		target->pop_back();
-
 	}
-	WriteToFile(); // only happen here
+	WriteToFile();
 	return ret;
 }
 
@@ -136,4 +141,9 @@ void HighScoresStorage::WriteToFile()
 			file.write((char*)&(fr_scores_[i]),sizeof(int));
 	}
 	file.close();
+}
+
+HighScoresStorage::~HighScoresStorage()
+{
+	WriteToFile(); // write again to ensure synchronization, not necessary for now though
 }

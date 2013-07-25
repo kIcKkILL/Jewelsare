@@ -7,6 +7,7 @@
 
 namespace Jewelsare {
 
+// Should be used as interface
 class ModeLogic : public QObject
 {
 	Q_OBJECT
@@ -35,7 +36,7 @@ class TimeOutMode : public ModeLogic
 public:
 	TimeOutMode();
 	int NextGeneration();
-	void FinishedOneMove() {} // do nothing
+	void FinishedOneMove() {} // do nothing in TimeOutMode
 
 };
 

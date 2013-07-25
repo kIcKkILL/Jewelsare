@@ -15,7 +15,7 @@ struct GameSettings {
 	Difficulty difficulty;
 };
 
-class Game;
+class Game; // forward statement
 
 class HighScoresStorage {
 public:
@@ -24,6 +24,7 @@ public:
 	bool NewScore(Mode mode,int score);
 	int GetScore(Mode mode,int rank);
 	void WriteToFile();
+	~HighScoresStorage();
 
 	// copy inhibited
 	HighScoresStorage(const HighScoresStorage&) = delete;
