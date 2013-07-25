@@ -18,7 +18,6 @@ struct GameSettings {
 class Game;
 
 class HighScoresStorage {
-	// TODO Implement this class
 public:
 	static const int kMaxRecord = 8;
 	HighScoresStorage();
@@ -62,6 +61,7 @@ signals:
 	void TimeTick(int remain);
 	void ScoreUpdated(int new_score);
 	void GameEnd(bool high_score);
+	void Hint(Jewelsare::JewelPos pos);
 
 public slots:
 

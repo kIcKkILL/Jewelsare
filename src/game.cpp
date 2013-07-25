@@ -29,9 +29,11 @@ Game::Game(const GameSettings &settings,QObject *parent) :
 	switch (settings.mode) {
 	case Mode::TIME_LIMIT:
 		mode_logic_ = new TimeOutMode();
+		hint_ = false;
 		break;
 	case Mode::FAST_REACTION:
 		mode_logic_ = new FastReactionMode();
+		hint_ = true;
 		break;
 	}
 
@@ -56,8 +58,14 @@ std::list<BoardEvent> Game::Swap(JewelPos pos,Jewelsare::SwapDirection direction
 			emit(ScoreUpdated(score_system_->GetScore()));
 		}
 	}
-	mode_logic_->FinishedOneMove();
-	score_system_->FinishMove();
+
+	if(!events.empty()) { //not a fail swap
+		mode_logic_->FinishedOneMove();
+		score_system_->FinishMove();
+	}
+	if(hint_)
+		emit(Hint(board_->GetPossibleSwap()));
+
 	return events;
 }
 
@@ -65,7 +73,10 @@ BoardEvent Game::NewGame()
 {
 	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame_()));
 	connect(mode_logic_,SIGNAL(TimeTick(int)),this,SIGNAL(TimeTick(int)));
-	return board_->Init();
+	BoardEvent ret = board_->Init();
+	if(hint_)
+		emit(Hint(board_->GetPossibleSwap()));
+	return ret;
 }
 
 void Game::Pause()

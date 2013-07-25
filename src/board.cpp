@@ -9,7 +9,8 @@ using namespace std;
 Board::Board(Size size) :
 	board_(size,vector<int>(size,0)),
 	generation_factor_(1),
-	size_(size)
+	size_(size),
+	last_possible_swap_(0,0)
 {
 	srand(time(NULL));
 }
@@ -86,6 +87,11 @@ list<BoardEvent> Board::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
 	return events;
 }
 
+JewelPos Board::GetPossibleSwap()
+{
+	return last_possible_swap_;
+}
+
 BoardEvent Board::Init()
 {
 	BoardEvent event(BoardEvent::EventType::NEW);
@@ -112,7 +118,7 @@ list<JewelInfo> Board::Generate(IntTab &tab)
 	return infolist;
 }
 
-int Board::PossibleSwap(const IntTab& tab) const
+int Board::PossibleSwap(const IntTab& tab)
 {
 	IntTab tab2 = tab;
 	int count = 0;
@@ -122,8 +128,11 @@ int Board::PossibleSwap(const IntTab& tab) const
 			// swap
 			tab2[i][j] = tab2[i][j+1];
 			tab2[i][j+1] = tab[i][j];
-			if(!Eliminatable(tab2).empty())
+			if(!Eliminatable(tab2).empty()) {
+				last_possible_swap_.x = i;
+				last_possible_swap_.y = j;
 				++count;
+			}
 			// revert changes
 			tab2[i][j] = tab[i][j];
 			tab2[i][j+1] = tab[i][j+1];
@@ -134,8 +143,11 @@ int Board::PossibleSwap(const IntTab& tab) const
 			// swap
 			tab2[i][j] = tab2[i+1][j];
 			tab2[i+1][j] = tab[i][j];
-			if(!Eliminatable(tab2).empty())
+			if(!Eliminatable(tab2).empty()) {
+				last_possible_swap_.x = i;
+				last_possible_swap_.y = j;
 				++count;
+			}
 			// revert changes
 			tab2[i][j] = tab[i][j];
 			tab2[i+1][j] = tab[i+1][j];

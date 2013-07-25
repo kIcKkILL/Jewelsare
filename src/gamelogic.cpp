@@ -42,9 +42,10 @@ void ModeLogic::Resume()
 FastReactionMode::FastReactionMode() :
 	ModeLogic(nullptr)
 {
-	timer_->SetTimeRemained(5);
+	timer_->SetTimeRemained(4);
 	timer_->Start();
 	diff_ = 4;
+	count_ = 0;
 }
 
 int FastReactionMode::NextGeneration()
@@ -65,5 +66,12 @@ void FastReactionMode::ReduceDifficulty()
 
 void FastReactionMode::FinishedOneMove()
 {
-	timer_->SetTimeRemained(5);
+	int ntime = 4;
+	if(count_ > 10)
+		ntime = 3;
+	if(count_ > 25)
+		ntime - 2;
+	timer_->SetTimeRemained(4);
+	emit(TimeTick(ntime)); // refresh
+	++count_;
 }

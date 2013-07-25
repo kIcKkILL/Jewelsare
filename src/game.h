@@ -31,6 +31,7 @@ signals:
 	void ScoreUpdated(int);
 	void TimeTick(int);
 	void GameEnd(int score);
+	void Hint(Jewelsare::JewelPos);
 	
 public slots:
 	void EndGame_();
@@ -39,6 +40,7 @@ private:
 	Board *board_;
 	ScoreSystem *score_system_;
 	ModeLogic *mode_logic_;
+	bool hint_;
 };
 
 }

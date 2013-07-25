@@ -40,17 +40,18 @@ private slots:
 	void OnSwap(Jewelsare::SwapDirection);
 	void GameEnd_(bool high_score);
 	void StartHome_();
+	void HintProcessor_(Jewelsare::JewelPos pos);
 
 private:
-	void Wait(int msec);
+	void ShowHint_();
 	bool ui_drawing_; // swap lock
-	bool animation_drawing_; // internal lock
+	bool animation_drawing_; // internal drawing lock
 
 	static const int kJewelWidgetSize = 50;
 	// Three StartXXX functions affects only GUI
 	void StartSelect_();
 	void StartGame_();
-	void DrawBoardEvent(Jewelsare::BoardEvent);
+	void DrawBoardEvent_(Jewelsare::BoardEvent);
 	bool SwapJewelInMap_(int x,int y,Jewelsare::SwapDirection);
 
 	QFrame *current_frame_;
@@ -64,6 +65,8 @@ private:
 	Jewelsare::GameState *game_state_;
 	std::pair<Jewelsare::Color,JewelWidget*> map_[Jewelsare::Board::kLargeSize][Jewelsare::Board::kLargeSize];
 	int board_size_;
+	bool hint_; // whether to show hint
+	Jewelsare::JewelPos hint_pos_;
 };
 
 #endif // MAINWINDOW_H

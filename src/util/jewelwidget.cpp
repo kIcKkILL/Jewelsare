@@ -5,7 +5,8 @@
 JewelWidget::JewelWidget(Jewelsare::Color color, QWidget *parent) :
 	QWidget(parent),
 	color_(color),
-	mouse_down_(false)
+	mouse_down_(false),
+	selected_(false)
 {
 
 }
@@ -42,12 +43,20 @@ void JewelWidget::paintEvent(QPaintEvent *event)
 		break;
 	}
 	painter.drawPixmap(0,0,size().width(),size().height(),*pixmap);
+	QPen pen;
+	pen.setWidth(3);
+	pen.setColor(Qt::white);
+	painter.setPen(pen);
+	if(selected_)
+		painter.drawRect(0,0,geometry().width(),geometry().height());
 }
 
 void JewelWidget::mousePressEvent(QMouseEvent *event)
 {
 	mouse_down_ = true;
 	mouse_down_pos_ = event->pos();
+	selected_ = true;
+	update(); // active selection indicator
 }
 
 void JewelWidget::mouseMoveEvent(QMouseEvent *event)
@@ -76,11 +85,15 @@ void JewelWidget::mouseMoveEvent(QMouseEvent *event)
 			else
 				return;
 		}
+		selected_ = false;
+		update(); // deactive selection indicator
 		mouse_down_ = false;
+		// revert to original size
 	}
 }
 
 void JewelWidget::mouseReleaseEvent(QMouseEvent*)
 {
 	mouse_down_ = false;
+	selected_ = false;
 }

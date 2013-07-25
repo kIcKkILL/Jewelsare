@@ -32,6 +32,7 @@ private:
 	Jewelsare::Color color_;
 	bool mouse_down_;
 	QPointF mouse_down_pos_;
+	bool selected_;
 };
 
 #endif // JEWEL_H

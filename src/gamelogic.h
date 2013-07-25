@@ -50,6 +50,7 @@ public:
 	void FinishedOneMove();
 private:
 	int diff_;
+	int count_;
 };
 
 }

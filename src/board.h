@@ -59,7 +59,8 @@ public:
 	explicit Board(Size);
 	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection);
 	void SetGenerationFactor(int f) {generation_factor_ = f;}
-	int GetColorAt(int x,int y) { return board_[x][y]; }
+	JewelPos GetPossibleSwap();
+	int GetColorAt(int x,int y) {return board_[x][y];}
 	BoardEvent Init();
 
 	// copy inhibited
@@ -68,10 +69,11 @@ public:
 
 private:
 	std::list<JewelInfo> Generate(IntTab &tab);
-	int PossibleSwap(const IntTab&) const;
+	int PossibleSwap(const IntTab&);
 	std::list<JewelPos> Eliminatable(const IntTab&) const;
 	std::list<std::pair<JewelPos,JewelPos>> Fall(IntTab&);
 
+	JewelPos last_possible_swap_;
 	IntTab board_;
 	int generation_factor_;
 	const Size size_;

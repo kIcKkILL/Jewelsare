@@ -50,6 +50,7 @@ BoardEvent GameState::StartNewGame()
 	connect(game_,SIGNAL(TimeTick(int)),this,SIGNAL(TimeTick(int)));
 	connect(game_,SIGNAL(ScoreUpdated(int)),this,SIGNAL(ScoreUpdated(int)));
 	connect(game_,SIGNAL(GameEnd(int)),this,SLOT(GameEndProcessor_(int)));
+	connect(game_,SIGNAL(Hint(Jewelsare::JewelPos)),this,SIGNAL(Hint(Jewelsare::JewelPos)));
 
 	state_ = INGAME;
 	return game_->NewGame();
