@@ -30,9 +30,10 @@ public:
 signals:
 	void ScoreUpdated(int);
 	void TimeTick(int);
+	void GameEnd(int score);
 	
 public slots:
-	void EndGame();
+	void EndGame_();
 
 private:
 	Board *board_;

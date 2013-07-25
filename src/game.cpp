@@ -56,13 +56,14 @@ std::list<BoardEvent> Game::Swap(JewelPos pos,Jewelsare::SwapDirection direction
 			emit(ScoreUpdated(score_system_->GetScore()));
 		}
 	}
+	mode_logic_->FinishedOneMove();
 	score_system_->FinishMove();
 	return events;
 }
 
 BoardEvent Game::NewGame()
 {
-	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame()));
+	connect(mode_logic_,SIGNAL(TimeOut()),this,SLOT(EndGame_()));
 	connect(mode_logic_,SIGNAL(TimeTick(int)),this,SIGNAL(TimeTick(int)));
 	return board_->Init();
 }
@@ -77,7 +78,7 @@ void Game::Resume()
 	mode_logic_->Resume();
 }
 
-void Game::EndGame()
+void Game::EndGame_()
 {
-
+	emit(GameEnd(score_system_->GetScore()));
 }

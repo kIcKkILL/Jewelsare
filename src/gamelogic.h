@@ -11,47 +11,45 @@ class ModeLogic : public QObject
 {
 	Q_OBJECT
 public:
+	ModeLogic(QObject *parent = 0);
 	virtual int NextGeneration() = 0;
-	virtual void Pause() = 0;
-	virtual void Resume() = 0;
+	void Pause();
+	void Resume();
+	virtual void FinishedOneMove() = 0;
 
 	// copy inhibited
+	ModeLogic() = delete;
 	ModeLogic(const ModeLogic&) = delete;
 	ModeLogic& operator=(const ModeLogic&) = delete;
 
 signals:
 	void TimeTick(int);
 	void TimeOut();
-};
-
-class TimeOutMode : public ModeLogic {
-	Q_OBJECT
-public:
-	explicit TimeOutMode();
-	int NextGeneration();
-	void Pause();
-	void Resume();
-signals:
-	void TimeTick(int);
-	void TimeOut();
-
-private:
+protected:
 	CountdownTimer *timer_;
 };
 
-class FastReactionMode : public ModeLogic {
+class TimeOutMode : public ModeLogic
+{
 	Q_OBJECT
 public:
+	TimeOutMode();
+	int NextGeneration();
+	void FinishedOneMove() {} // do nothing
+
+};
+
+class FastReactionMode : public ModeLogic
+{
+	Q_OBJECT
+public:
+	FastReactionMode();
+	int NextGeneration();
 	void IncreaseDifficulty();
 	void ReduceDifficulty();
-	FastReactionMode()
-	{
-		// TODO
-	}
-	int NextGeneration() { return 5; }
-	void Pause(){}
-	void Resume(){}
-	// TODO
+	void FinishedOneMove();
+private:
+	int diff_;
 };
 
 }

@@ -2,6 +2,7 @@
 #define GAMESTATE_H
 
 #include <QObject>
+#include <vector>
 #include "board.h"
 #include "util/jewelwidget.h"
 
@@ -19,13 +20,19 @@ class Game;
 class HighScoresStorage {
 	// TODO Implement this class
 public:
-	HighScoresStorage() {}
-	void NewScore(int) {}
-	int GetScore(int rank) {return -1;}
+	static const int kMaxRecord = 8;
+	HighScoresStorage();
+	bool NewScore(Mode mode,int score);
+	int GetScore(Mode mode,int rank);
+	void WriteToFile();
 
 	// copy inhibited
 	HighScoresStorage(const HighScoresStorage&) = delete;
 	HighScoresStorage& operator=(const HighScoresStorage&) = delete;
+
+private:
+	std::vector<int> tl_scores_;
+	std::vector<int> fr_scores_;
 };
 
 class GameState : public QObject
@@ -41,17 +48,25 @@ public:
 	BoardEvent StartNewGame();
 	void Pause();
 	void Resume();
+	void Abort();
+	int GetScore(Mode mode,int rank) {return highscores_.GetScore(mode,rank);}
 	std::list<BoardEvent> Swap(JewelPos,Jewelsare::SwapDirection direction);
 
 	// copy inhibited
 	GameState(const GameState&) = delete;
-	GameState& operator=(const GameSTate&) = delete;
+	GameState& operator=(const GameState&) = delete;
+
+	State state() const;
 
 signals:
 	void TimeTick(int remain);
 	void ScoreUpdated(int new_score);
+	void GameEnd(bool high_score);
 
 public slots:
+
+private slots:
+	void GameEndProcessor_(int);
 
 private:
 	HighScoresStorage highscores_;

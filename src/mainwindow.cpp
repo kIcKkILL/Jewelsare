@@ -1,4 +1,5 @@
 #include <QPropertyAnimation>
+#include <QMessageBox>
 #include <QGridLayout>
 #include <QColor>
 #include <QPixmap>
@@ -6,6 +7,7 @@
 #include <QButtonGroup>
 #include <QLabel>
 #include <QFrame>
+#include <ctime>
 #include "util/jewelbutton.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -26,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 
 	game_state_ = new GameState();
+	connect(game_state_,SIGNAL(GameEnd(bool)),this,SLOT(GameEnd_(bool)));
 
 	current_frame_ = 0;
 	StartHome_();
@@ -41,7 +44,8 @@ void MainWindow::StartHome_()
 	if(current_frame_)
 		delete current_frame_;
 
-	current_frame_ = new QFrame(ui->centralWidget);
+	current_frame_ = new QFrame(this);
+	setCentralWidget(current_frame_);
 	QGridLayout* layout = new QGridLayout(current_frame_);
 	JewelButton *start_button,*score_button;
 	start_button = new JewelButton(current_frame_);
@@ -65,7 +69,29 @@ void MainWindow::StartClicked()
 
 void MainWindow::ScoreClicked()
 {
+	if(current_frame_)
+		delete current_frame_;
 
+	current_frame_ = new QFrame(this);
+	setCentralWidget(current_frame_);
+	QGridLayout *layout = new QGridLayout(current_frame_);
+	QLabel *label1 = new QLabel(tr("Time Limited Mode"),current_frame_);
+	QLabel *label2 = new QLabel(tr("Fast Reaction Mode"),current_frame_);
+	layout->addWidget(label1,0,0);
+	layout->addWidget(label2,0,1);
+	QLabel *tl_display[HighScoresStorage::kMaxRecord];
+	QLabel *fr_display[HighScoresStorage::kMaxRecord];
+	for(int i=0;i!=HighScoresStorage::kMaxRecord;++i) {
+		tl_display[i] = new QLabel(QString::number(game_state_->GetScore(Mode::TIME_LIMIT,i)),current_frame_);
+		fr_display[i] = new QLabel(QString::number(game_state_->GetScore(Mode::FAST_REACTION,i)),current_frame_);
+		layout->addWidget(tl_display[i],i+1,0);
+		layout->addWidget(fr_display[i],i+1,1);
+	}
+
+	JewelButton *ret_button = new JewelButton(current_frame_);
+	ret_button->setText(tr("Return"));
+	layout->addWidget(ret_button,HighScoresStorage::kMaxRecord,1);
+	connect(ret_button,SIGNAL(clicked()),this,SLOT(StartHome_()));
 }
 
 void MainWindow::StartSelect_()
@@ -73,12 +99,13 @@ void MainWindow::StartSelect_()
 	if(current_frame_)
 		delete current_frame_;
 
-	current_frame_ = new QFrame(ui->centralWidget);
-	QGridLayout* layout = new QGridLayout(current_frame_);
+	current_frame_ = new QFrame(this);
+	setCentralWidget(current_frame_);
+	QGridLayout *layout = new QGridLayout(current_frame_);
 
 	JewelButton *go_button = new JewelButton(current_frame_);
 	go_button->setText(tr("GO"));
-	layout->addWidget(go_button,2,0);
+	layout->addWidget(go_button,2,2);
 	connect(go_button,SIGNAL(clicked()),this,SLOT(GoClicked()));
 
 	QButtonGroup *mode_group = new QButtonGroup(current_frame_);
@@ -140,7 +167,21 @@ void MainWindow::GoClicked()
 
 void MainWindow::AbortClicked()
 {
-	// TODO stop game and return home
+	game_state_->Abort();
+	// Set up initial frame
+	StartHome_();
+}
+
+void MainWindow::PauseClicked()
+{
+	if(game_state_->state() == GameState::PAUSE) {
+		pause_button_->setText(tr("Pause"));
+		game_state_->Resume();
+	}
+	else {
+		pause_button_->setText(tr("Resume"));
+		game_state_->Pause();
+	}
 }
 
 void MainWindow::UpdateTimeDisplay(int remain)
@@ -151,10 +192,11 @@ void MainWindow::UpdateTimeDisplay(int remain)
 
 void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 {
-	if(ui_drawing_)
+	if(ui_drawing_ || game_state_->state()!=GameState::INGAME)
 		return;
 
 	game_state_->Pause();
+	pause_button_->setEnabled(false);
 	JewelWidget *sender = (JewelWidget*)this->sender();
 	int x = sender->geometry().y()/50;
 	int y = sender->geometry().x()/50;
@@ -164,24 +206,46 @@ void MainWindow::OnSwap(Jewelsare::SwapDirection direction)
 	//swap first
 	if(!SwapJewelInMap_(x,y,direction))
 		return;
-	update();
 
 	auto events = game_state_->Swap(pos,direction);
 	bool swaped = false;
 	for(BoardEvent event : events) {
+		//Wait(250);
 		swaped = true;
-		DrawBoardEventent(event);
+		DrawBoardEvent(event);
 	}
 	if(!swaped) {
-		assert(SwapJewelInMap_(x,y,direction));
+		assert(SwapJewelInMap_(x,y,direction)); // TODO replace it with proper exception handling
 		update();
 	}
 
 	game_state_->Resume();
+	pause_button_->setEnabled(true);
 	ui_drawing_ = false;
 }
 
-void MainWindow::DrawBoardEventent(BoardEvent event)
+void MainWindow::GameEnd_(bool high_score)
+{
+	time_display_->setText(QString::number(0));
+	if(high_score) {
+		QMessageBox info(this);
+		info.setWindowTitle(tr("Congratulations!"));
+		info.setText(tr("You have achieved a new high score!"));
+		info.exec();
+	}
+	pause_button_->setEnabled(false);
+}
+
+void MainWindow::Wait(int msec)
+{
+	time_t otime = clock();
+	while(1) {
+		if((float)(clock() - otime)/(float)CLOCKS_PER_SEC*1000 > (float)msec)
+			break;
+	}
+}
+
+void MainWindow::DrawBoardEvent(BoardEvent event)
 {
 	// TODO animate it
 	switch (event.type) {
@@ -194,22 +258,22 @@ void MainWindow::DrawBoardEventent(BoardEvent event)
 	case BoardEvent::EventType::DIE:
 		for(JewelPos pos :event.GetDiePos()) {
 			JewelWidget *widget = map_[pos.x][pos.y].second;
+			map_[pos.x][pos.y].first = Color::NONE;
+			widget -> SetColor(Color::NONE);
 
-			/* animation
+			/*
 			int ox=widget->x(), oy = widget->y();
 			QPropertyAnimation *animation = new QPropertyAnimation(widget,"geometry");
 			animation->setDuration(500);
 			animation->setEndValue((QRect(ox+kJewelWidgetSize/2,oy+kJewelWidgetSize/2,0,0)));
 			animation->setStartValue((QRect(ox,oy,kJewelWidgetSize,kJewelWidgetSize)));
 			animation_drawing_ = true;
-			animation->start();
 			connect(animation,&QPropertyAnimation::finished,[=](){
 				animation_drawing_ = false;
 			});
+			animation->start();
 			*/
 
-			map_[pos.x][pos.y].first = Color::NONE;
-			widget -> SetColor(Color::NONE);
 		}
 		break;
 	case BoardEvent::EventType::FALL:
@@ -232,7 +296,8 @@ void MainWindow::StartGame_()
 	// Set new UI frame
 	delete current_frame_;
 
-	current_frame_ = new QFrame(ui->centralWidget);
+	current_frame_ = new QFrame(this);
+	setCentralWidget(current_frame_);
 	QFrame *right_frame = new QFrame(current_frame_);
 	QGridLayout *layout = new QGridLayout(current_frame_);
 	QGridLayout *right_layout = new QGridLayout(right_frame);
@@ -252,11 +317,16 @@ void MainWindow::StartGame_()
 	abort_button->setText(tr("Abort"));
 	connect(abort_button,SIGNAL(clicked()),this,SLOT(AbortClicked()));
 
+	pause_button_ = new JewelButton(right_frame);
+	pause_button_->setText(tr("Pause"));
+	connect(pause_button_,SIGNAL(clicked()),this,SLOT(PauseClicked()));
+
 	right_layout->addWidget(label1,0,0);
 	right_layout->addWidget(score_display_,1,0);
 	right_layout->addWidget(label3,2,0);
 	right_layout->addWidget(time_display_,3,0);
-	right_layout->addWidget(abort_button,4,0);
+	right_layout->addWidget(pause_button_,4,0);
+	right_layout->addWidget(abort_button,5,0);
 
 	layout->addWidget(board,0,0);
 	layout->addWidget(right_frame,0,1);
@@ -269,7 +339,7 @@ void MainWindow::StartGame_()
 			connect(map_[i][j].second,SIGNAL(Swap(Jewelsare::SwapDirection)),this,SLOT(OnSwap(Jewelsare::SwapDirection)));
 		}
 	current_frame_->show();
-	DrawBoardEventent(game_state_->StartNewGame());
+	DrawBoardEvent(game_state_->StartNewGame());
 	connect(game_state_,SIGNAL(TimeTick(int)),this,SLOT(UpdateTimeDisplay(int)));
 	connect(game_state_,SIGNAL(ScoreUpdated(int)),this,SLOT(UpdateScore_(int)));
 }
@@ -333,5 +403,6 @@ bool MainWindow::SwapJewelInMap_(int x, int y, SwapDirection direction)
 		break;
 	}
 	// No special case happened where swap outside the board
+	update();
 	return true;
 }

@@ -61,7 +61,7 @@ list<BoardEvent> Board::Swap(JewelPos pos,Jewelsare::SwapDirection direction)
 	// elimination
 	for(JewelPos pos :deleted)
 		board_[pos.x][pos.y] = 0;
-	// TODO fall->eliminate->fall->eliminate-> ...
+	// fall->eliminate->fall->eliminate-> ...
 	do {
 		//fall
 		new_event = BoardEvent(BoardEvent::EventType::FALL);

@@ -19,6 +19,7 @@ class QButtonGroup;
 class QColor;
 class QGridLayout;
 class QLabel;
+class QPushButton;
 
 class MainWindow : public QMainWindow
 {
@@ -33,20 +34,23 @@ private slots:
 	void ScoreClicked();
 	void GoClicked();
 	void AbortClicked();
+	void PauseClicked();
 	void UpdateScore_(int new_score);
 	void UpdateTimeDisplay(int);
 	void OnSwap(Jewelsare::SwapDirection);
-    
+	void GameEnd_(bool high_score);
+	void StartHome_();
+
 private:
-	bool ui_drawing_; // lock
+	void Wait(int msec);
+	bool ui_drawing_; // swap lock
 	bool animation_drawing_; // internal lock
 
 	static const int kJewelWidgetSize = 50;
 	// Three StartXXX functions affects only GUI
-	void StartHome_();
 	void StartSelect_();
 	void StartGame_();
-	void DrawBoardEventent(Jewelsare::BoardEvent);
+	void DrawBoardEvent(Jewelsare::BoardEvent);
 	bool SwapJewelInMap_(int x,int y,Jewelsare::SwapDirection);
 
 	QFrame *current_frame_;
@@ -54,6 +58,7 @@ private:
 	QButtonGroup *difficulty_group_;
 	QLabel *score_display_;
 	QLabel *time_display_;
+	QPushButton *pause_button_;
     Ui::MainWindow *ui;
 
 	Jewelsare::GameState *game_state_;

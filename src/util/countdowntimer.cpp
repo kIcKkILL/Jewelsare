@@ -46,6 +46,6 @@ void CountdownTimer::InternalTimerTimeout_()
 
 void CountdownTimer::SetTimeRemained(int sec)
 {
-	if(dead_ && sec > 0)
+	if(sec > 0)
 		remain_sec_ = sec;
 }
